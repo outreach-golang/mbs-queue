@@ -1,4 +1,4 @@
-module mbs-queue
+module github.com/outreach-golang/mbs-queue
 
 go 1.19
 
