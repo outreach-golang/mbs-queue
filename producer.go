@@ -52,18 +52,26 @@ func WithConsoleEnabled(enabled bool) ProducerOption {
 	}
 }
 
-func (p *Producer) SendNormalMessage(ctx context.Context, topic string, tag string, messageBody string) error {
+func (p *Producer) SendNormalMessage(ctx context.Context, topic string, tag string, messageBody string) (string, error) {
+	var messageID string
+
 	msg := rmqClient.Message{
 		Topic: topic,
 		Body:  []byte(messageBody),
 		Tag:   &tag,
 	}
-	_, err := p.Producer.Send(ctx, &msg)
+
+	serRes, err := p.Producer.Send(ctx, &msg)
 	if err != nil {
-		return err
+		return messageID, err
 	}
 
-	return nil
+	for _, re := range serRes {
+		tmp := re
+		messageID = tmp.MessageID
+	}
+
+	return messageID, nil
 }
 
 func (p *Producer) Stop() error {
