@@ -6,11 +6,12 @@ import (
 )
 
 type ProducerOptions struct {
-	Endpoint  string
-	AccessKey string
-	SecretKey string
-	Topic     []string
-	GroupName string
+	Endpoint       string
+	AccessKey      string
+	SecretKey      string
+	Topic          []string
+	GroupName      string
+	ConsoleEnabled bool
 }
 
 type Producer struct {
@@ -42,6 +43,12 @@ func WithTopic(topic []string) ProducerOption {
 func WithGroupName(groupName string) ProducerOption {
 	return func(options *ProducerOptions) {
 		options.GroupName = groupName
+	}
+}
+
+func WithConsoleEnabled(enabled bool) ProducerOption {
+	return func(options *ProducerOptions) {
+		options.ConsoleEnabled = enabled
 	}
 }
 

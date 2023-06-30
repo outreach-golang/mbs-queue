@@ -3,12 +3,18 @@ package mbs_queue
 import (
 	rmqClient "github.com/apache/rocketmq-clients/golang/v5"
 	"github.com/apache/rocketmq-clients/golang/v5/credentials"
+	"os"
 )
 
 func NewProducer(options ...ProducerOption) (*Producer, error) {
 	producerOptions := ProducerOptions{}
 	for _, option := range options {
 		option(&producerOptions)
+	}
+
+	if producerOptions.ConsoleEnabled {
+		os.Setenv("mq.consoleAppender.enabled", "true")
+		rmqClient.ResetLogger()
 	}
 
 	producer, err := rmqClient.NewProducer(
