@@ -76,11 +76,15 @@ func (p *Producer) SendNormalMessage(ctx context.Context, topic string, tag stri
 	return messageID, nil
 }
 
+type asyncCallbackData struct {
+	MessageID string
+	Err       error
+}
+
 // SendAsyncMessage 普通异步无序消息
 func (p *Producer) SendAsyncMessage(ctx context.Context, topic string, tag string, messageBody string) (string, error) {
 	var (
-		messageID string
-		errs      error
+		callbackDataChan = make(chan asyncCallbackData, 1)
 	)
 
 	msg := rmqClient.Message{
@@ -90,19 +94,24 @@ func (p *Producer) SendAsyncMessage(ctx context.Context, topic string, tag strin
 	}
 
 	p.Producer.SendAsync(ctx, &msg, func(ctx context.Context, resp []*rmqClient.SendReceipt, err error) {
+		var res asyncCallbackData
+
 		if err != nil {
-			errs = err
-			return
+			res.Err = err
 		}
 
 		for _, re := range resp {
 			tmp := re
-			messageID = tmp.MessageID
+			res.MessageID = tmp.MessageID
 		}
+
+		callbackDataChan <- res
 
 	})
 
-	return messageID, errs
+	res := <-callbackDataChan
+
+	return res.MessageID, res.Err
 }
 
 // SendFifoMessage 同步有序消息
