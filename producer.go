@@ -100,7 +100,6 @@ func (p *Producer) SendAsyncMessage(ctx context.Context, topic string, tag strin
 			messageID = tmp.MessageID
 		}
 
-		return
 	})
 
 	return messageID, errs
